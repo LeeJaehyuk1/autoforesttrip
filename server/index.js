@@ -226,10 +226,18 @@ app.get('/api/events/stream', (req, res) => {
 app.use(express.static(PUBLIC_DIR));
 app.get('*', (req, res) => res.sendFile('index.html', { root: PUBLIC_DIR }));
 
-const server = app.listen(config.port, () => {
-  console.log(`\n🌲 숲나들e 모니터 실행: http://localhost:${config.port}`);
+console.log(`[boot] listen 시도: 0.0.0.0:${config.port}`);
+const server = app.listen(config.port, '0.0.0.0', () => {
+  console.log(`\n🌲 숲나들e 모니터 실행 중 (0.0.0.0:${config.port})`);
   console.log(`   텔레그램: ${telegramEnabled() ? '연결됨' : '미설정'} · 인증: ${AUTH_TOKEN ? '비밀번호' : '없음'}`);
-  startScheduler();
+  try {
+    startScheduler();
+  } catch (e) {
+    console.error('[scheduler] 시작 오류', e?.stack || e);
+  }
+});
+server.on('error', (e) => {
+  console.error('[FATAL listen error]', e?.stack || e);
 });
 
 async function shutdown() {

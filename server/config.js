@@ -47,4 +47,16 @@ export const config = {
   baseUrl: 'https://www.foresttrip.go.kr',
 };
 
+// 부팅 진단: 가장 먼저 평가되는 모듈이므로 여기서 전역 오류 핸들러를 등록한다.
+// (이후 import 단계에서 무엇이 죽는지 로그로 확실히 남기기 위함)
+process.on('uncaughtException', (e) => {
+  console.error('[FATAL uncaughtException]', e?.stack || e);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('[FATAL unhandledRejection]', e?.stack || e);
+});
+console.log(
+  `[boot] config 로드됨 · PORT=${config.port} · DATA_DIR=${DATA_DIR} · HEADLESS=${config.headless}`,
+);
+
 export default config;
