@@ -1,0 +1,21 @@
+{
+  "name": "autoforesttrip",
+  "version": "1.0.0",
+  "description": "숲나들e 자연휴양림 예약 빈자리 모니터링 + 텔레그램 알림 + 베스트에포트 자동예약 웹앱",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "postinstall": "playwright install chromium"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "playwright": "^1.50.1"
+  },
+  "license": "MIT"
+}

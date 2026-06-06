@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    image: autoforesttrip
+    container_name: autoforesttrip
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - HEADLESS=true
+    volumes:
+      - ./data:/app/data
+    # Chromium 안정성을 위해 공유메모리 확장
+    shm_size: "1gb"
+    restart: unless-stopped

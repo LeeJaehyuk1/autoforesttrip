@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#14532d" />
+  <title>숲나들e 빈자리 모니터</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>" />
+</head>
+<body>
+  <!-- 로그인 오버레이 -->
+  <div id="loginOverlay" class="overlay hidden">
+    <form id="loginForm" class="card login-card">
+      <h2>🌲 접속 인증</h2>
+      <p class="muted">관리자 비밀번호를 입력하세요.</p>
+      <input type="password" id="loginPw" placeholder="비밀번호" autocomplete="current-password" />
+      <button type="submit" class="btn primary">입장</button>
+      <p id="loginErr" class="err"></p>
+    </form>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">🌲 <span>숲나들e 빈자리 모니터</span></div>
+    <div class="top-actions">
+      <span id="tgBadge" class="badge" title="텔레그램 상태">텔레그램 …</span>
+      <button id="soundToggle" class="icon-btn" title="알림음 켜기/끄기">🔔</button>
+      <button id="btnAdd" class="btn primary sm">+ 새 모니터</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="jobsWrap">
+      <div class="section-head">
+        <h2>모니터링 목록</h2>
+        <button id="btnRefresh" class="btn ghost sm">새로고침</button>
+      </div>
+      <div id="jobs" class="jobs-grid"></div>
+      <div id="emptyJobs" class="empty hidden">
+        아직 모니터가 없습니다. <b>+ 새 모니터</b>로 빈자리 감시를 시작하세요.
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="section-head"><h2>실시간 로그</h2><button id="btnClearLog" class="btn ghost sm">지우기</button></div>
+        <ul id="logFeed" class="log-feed"></ul>
+      </div>
+      <div class="card">
+        <h2>설정</h2>
+        <div class="setting-row">
+          <div>
+            <b>텔레그램 알림</b>
+            <p class="muted sm">서버 .env 의 BOT_TOKEN / CHAT_ID 로 전송됩니다.</p>
+          </div>
+          <button id="btnTgTest" class="btn ghost sm">테스트 전송</button>
+        </div>
+        <hr />
+        <div class="setting-row">
+          <div><b>숲나들e 로그인 정보</b><p class="muted sm">자동예약에 사용. 암호화 저장.</p></div>
+          <button id="btnAddCred" class="btn ghost sm">+ 추가</button>
+        </div>
+        <ul id="credList" class="cred-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- 모니터 추가/편집 모달 -->
+  <div id="jobModal" class="overlay hidden">
+    <form id="jobForm" class="card modal">
+      <div class="modal-head">
+        <h2 id="jobModalTitle">새 모니터</h2>
+        <button type="button" class="icon-btn" data-close>✕</button>
+      </div>
+      <input type="hidden" id="jobId" />
+
+      <label>모니터 이름
+        <input type="text" id="f_name" placeholder="예: 가평 주말 숙소" />
+      </label>
+
+      <div class="row">
+        <label>지역 *
+          <select id="f_region"></select>
+        </label>
+        <label>휴양림 (선택)
+          <select id="f_institt"><option value="">전체</option></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>구분
+          <select id="f_houseCamp">
+            <option value="01">휴양(숙박)</option>
+            <option value="02">야영</option>
+          </select>
+        </label>
+        <label>인원
+          <input type="number" id="f_people" min="1" max="30" value="2" />
+        </label>
+      </div>
+
+      <div class="row">
+        <label>입실일 *
+          <input type="date" id="f_begin" />
+        </label>
+        <label>퇴실일 *
+          <input type="date" id="f_end" />
+        </label>
+      </div>
+
+      <label>객실/이름 필터 (선택)
+        <input type="text" id="f_keyword" placeholder="예: 숲속의집, 황토방 (포함 검색)" />
+      </label>
+
+      <label>확인 주기
+        <div class="seg" id="f_intervalSeg">
+          <button type="button" data-v="1">1분</button>
+          <button type="button" data-v="5" class="on">5분</button>
+          <button type="button" data-v="10">10분</button>
+          <input type="number" id="f_intervalCustom" min="1" placeholder="직접" />
+        </div>
+      </label>
+
+      <div class="autobook-box">
+        <label class="check">
+          <input type="checkbox" id="f_autobook" /> <b>빈자리 발견 시 자동예약 시도</b>
+        </label>
+        <div id="autobookOpts" class="hidden">
+          <label>로그인 정보
+            <select id="f_credential"></select>
+          </label>
+          <p class="warn sm">⚠️ 자동예약은 로그인→객실선택→예약페이지 진입까지 진행하며, <b>최종 결제는 본인이 직접</b> 완료해야 합니다(보유 시간 제한 주의). 사이트 약관/대기열 상황에 따라 실패할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <label class="check"><input type="checkbox" id="f_enabled" checked /> 즉시 모니터링 시작</label>
+
+      <p id="jobErr" class="err"></p>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-close>취소</button>
+        <button type="submit" class="btn primary">저장</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 자격증명 추가 모달 -->
+  <div id="credModal" class="overlay hidden">
+    <form id="credForm" class="card modal sm-modal">
+      <div class="modal-head"><h2>숲나들e 로그인 정보</h2><button type="button" class="icon-btn" data-close>✕</button></div>
+      <label>별칭<input type="text" id="c_label" placeholder="예: 내 계정" /></label>
+      <label>아이디<input type="text" id="c_id" autocomplete="username" /></label>
+      <label>비밀번호<input type="password" id="c_pw" autocomplete="off" /></label>
+      <p class="muted sm">비밀번호는 서버에서 AES-256 으로 암호화되어 저장됩니다.</p>
+      <p id="credErr" class="err"></p>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-close>취소</button>
+        <button type="submit" class="btn primary">저장</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
