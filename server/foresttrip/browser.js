@@ -39,6 +39,8 @@ export async function withContext(fn, { storageState } = {}) {
     userAgent:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     storageState,
+    // 한국 IP 프록시 설정 시 모든 요청을 해당 프록시로 라우팅
+    proxy: config.proxy || undefined,
   });
   try {
     return await fn(context);

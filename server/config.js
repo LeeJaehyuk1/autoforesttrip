@@ -45,6 +45,14 @@ export const config = {
   headless: bool(process.env.HEADLESS, true),
   debugDump: bool(process.env.DEBUG_DUMP, false),
   baseUrl: 'https://www.foresttrip.go.kr',
+  // 한국 IP 프록시(해외 호스팅에서 숲나들e 접속 차단 우회용). 예: http://1.2.3.4:8080
+  proxy: process.env.PROXY_SERVER
+    ? {
+        server: process.env.PROXY_SERVER,
+        username: process.env.PROXY_USERNAME || undefined,
+        password: process.env.PROXY_PASSWORD || undefined,
+      }
+    : null,
 };
 
 // 부팅 진단: 가장 먼저 평가되는 모듈이므로 여기서 전역 오류 핸들러를 등록한다.
