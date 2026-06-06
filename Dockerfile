@@ -16,6 +16,7 @@ RUN npm install --omit=dev \
 COPY . .
 
 EXPOSE 3000
-VOLUME ["/app/data"]
 
+# 데이터 영속화: Railway 대시보드에서 Volume 을 /app/data 에 마운트하세요.
+# (도커 VOLUME 지시문은 Railway 빌드에서 미지원이라 사용하지 않습니다)
 CMD ["node", "server/index.js"]
